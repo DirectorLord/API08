@@ -33,7 +33,7 @@ public class OrderController(IOrderService service)
     }
 
     [HttpGet("DeliveryMethods")]
-    public async Task<ActionResult<IEnumerable<DeliveryMethodResponse>>> GetDeliveryMethod(, CancellationToken cancellationToken)
+    public async Task<ActionResult<IEnumerable<DeliveryMethodResponse>>> GetDeliveryMethod( CancellationToken cancellationToken)
     {
         var methods = await service.GetDeliveryMethodAsync(cancellationToken);
         return Ok(methods);

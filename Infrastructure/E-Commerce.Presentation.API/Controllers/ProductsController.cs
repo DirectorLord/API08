@@ -2,6 +2,7 @@
 using E_Commerce.Shared.DataTransferObjects;
 using E_Commerce.Shared.DataTransferObjects.Products;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 
@@ -22,6 +23,7 @@ public  class ProductsController (IProductService service)
 
     #region GetById
     [Authorize]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     [HttpGet("{id}")]
     public async Task<ActionResult<IEnumerable<ProductResponse>>> Get(int id, CancellationToken cancellationToken = default)
     {

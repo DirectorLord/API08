@@ -1,11 +1,12 @@
 using E_Commerce.Domain.Contracts;
+using E_Commerce.Infrastructure.Service;
 using E_Commerce.Persistence.DependencyInjection;
 using E_Commerce.Service.DependencyInjections;
 using ECommerce.Web.Handlers;
-using Microsoft.AspNetCore.Mvc;
-using E_Commerce.Infrastructure.Service;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using System.Text;
 namespace ECommerce.Web
 {
@@ -18,6 +19,35 @@ namespace ECommerce.Web
             // Add services to the container.
 
             builder.Services.AddControllers();
+
+            builder.Services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "Your API", Version = "v1" });
+
+                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                {
+                    Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
+                    Name = "Authorization",
+                    In = ParameterLocation.Header,
+                    Type = SecuritySchemeType.Http,
+                    Scheme = "bearer"
+                });
+
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement
+        {
+            {
+                new OpenApiSecurityScheme
+                {
+                    Reference = new OpenApiReference
+                    {
+                        Type = ReferenceType.SecurityScheme,
+                        Id = "Bearer"
+                    }
+                },
+                Array.Empty<string>()
+            }
+        });
+            });
 
             builder.Services.AddPersistenceServices(builder.Configuration);
             builder.Services.AddApplicationServices().AddPersistenceServices(builder.Configuration).AddInfrastructureServices(builder.Configuration);
@@ -101,12 +131,23 @@ namespace ECommerce.Web
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
-                app.UseSwaggerUI();
+                app.UseSwaggerUI(c =>
+                {
+                    c.DisplayRequestDuration();
+                    c.EnableFilter();
+                });
+
+                app.UseAuthentication();
+                app.UseAuthorization();
+
+                app.MapControllers();
             }
             app.UseStaticFiles();
             app.UseHttpsRedirection();
             app.UseAuthentication();
             app.UseAuthorization();
+
+
 
 
             app.MapControllers();
