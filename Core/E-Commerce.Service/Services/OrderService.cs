@@ -61,4 +61,27 @@ public class OrderService(IUnitOfWork unitOfWork, IMapper mapper, IBasketReposit
         await unitOfWork.SaveCHangesAsync();
         return mapper.Map<OrderResponse>(order);
     }
+
+    public async Task<Result<OrderResponse>> GetByIdAsync(Guid id)
+    {
+        var orders = await unitOfWork.GetRepository<OrderEntity, Guid>()
+            .GetAsync(new OrderByIdSpecification(id));
+        if( orders == null ) return Error.NotFound("Order was not found", $"Order with Id {id} was not found");
+
+        return mapper.Map<OrderResponse>(orders); 
+    }
+
+    public async Task<IEnumerable<OrderResponse>> GetByUserEmailAsync(string email)
+    {
+        var orders = await unitOfWork.GetRepository<OrderEntity, Guid>()
+            .GetAllAsync(new OrderByEmailSpecification(email));
+
+        return mapper.Map<IEnumerable<OrderResponse>>(orders);
+    }
+
+    public async Task<IEnumerable<DeliveryMethod>> GetDeliveryMethodAsync()
+    {
+        var method = await unitOfWork.GetRepository<DeliveryMethod, int>().GetAllAsync();
+        return mapper.Map<IEnumerable<DeliveryMethod>>(method);
+    }
 }

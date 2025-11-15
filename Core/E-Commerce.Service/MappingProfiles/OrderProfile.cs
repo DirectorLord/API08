@@ -1,4 +1,5 @@
 ﻿using E_Commerce.Domain.Entities.OrderEntities;
+using E_Commerce.Shared.DataTransferObjects;
 using E_Commerce.Shared.DataTransferObjects.UserOrder;
 using E_Commerce.Shared.DataTransferObjects.Users;
 
@@ -18,8 +19,12 @@ public class OrderProfile
             .ForMember(d => d.ProductId, o => o.MapFrom(s => s.Product.ProductId))
             .ForMember(d => d.Name, o => o.MapFrom(s => s.Product.Name))
             .ForMember(d => d.PictureUrl, o => o.MapFrom(s => s.Product.PictureUrl));
+
+        CreateMap<DeliveryMethod, DeliveryMethodResponse>();
     }
     //Resolver Task (im cooked)
     //Added DeliveryMethodCostResolver, DeliveryMethodNameResolver, DeliveryMethodNameAsyncResolver, DeliveryMethodCostAsyncResolver
     //idk if its working or not tbh
+
+    
 }
