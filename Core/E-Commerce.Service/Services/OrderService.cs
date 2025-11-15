@@ -8,16 +8,16 @@ namespace E_Commerce.Service.Services;
 public class OrderService(IUnitOfWork unitOfWork, IMapper mapper, IBasketRepository repository)
     : IOrderService
 {
-    public async Task<Result<OrderResponse>> CreateAsync(OrderRequest request, string email)
+    public async Task<Result<OrderResponse>> CreateAsync(OrderRequest request, string email, CancellationToken cancellationToken)
     {
         var basket = await repository.GetAsync(request.basketId);
         if (basket == null) return Error.NotFound("Basket was not found", $"Basket with Id {request.basketId} was not found");
-        var method = await unitOfWork.GetRepository<DeliveryMethod, int>().GetByIdAsync(request.DeliveryMethodId);
+        var method = await unitOfWork.GetRepository<DeliveryMethod, int>().GetByIdAsync(request.DeliveryMethodId, cancellationToken);
         if (method == null) return Error.NotFound("Delivery method was not found");
 
         var productRepo = unitOfWork.GetRepository<Product, int>();
         var ids = basket.Items.Select(i => i.Id).ToList();
-        var products = (await productRepo.GetAllAsync(new GetProductsByUdsSpecification(ids))).ToDictionary(p => p.Id);
+        var products = (await productRepo.GetAllAsync(new GetProductsByUdsSpecification(ids), cancellationToken)).ToDictionary(p => p.Id);
         var orderItems = new List<OrderItem>();
 
         var validationError = new List<Error>();
@@ -58,30 +58,30 @@ public class OrderService(IUnitOfWork unitOfWork, IMapper mapper, IBasketReposit
         };
         var orderRepo = unitOfWork.GetRepository<OrderEntity, Guid>();
         orderRepo.Add(order);
-        await unitOfWork.SaveCHangesAsync();
+        await unitOfWork.SaveCHangesAsync(cancellationToken);
         return mapper.Map<OrderResponse>(order);
     }
 
-    public async Task<Result<OrderResponse>> GetByIdAsync(Guid id)
+    public async Task<Result<OrderResponse>> GetOrderAsync(string email, Guid id, CancellationToken cancellationToken)
     {
         var orders = await unitOfWork.GetRepository<OrderEntity, Guid>()
-            .GetAsync(new OrderByIdSpecification(id));
+            .GetAsync(new OrderByIdAndEmailSpecification(email, id), cancellationToken);
         if( orders == null ) return Error.NotFound("Order was not found", $"Order with Id {id} was not found");
 
         return mapper.Map<OrderResponse>(orders); 
     }
 
-    public async Task<IEnumerable<OrderResponse>> GetByUserEmailAsync(string email)
+    public async Task<IEnumerable<OrderResponse>> GetAllAsync(string email, CancellationToken cancellationToken)
     {
         var orders = await unitOfWork.GetRepository<OrderEntity, Guid>()
-            .GetAllAsync(new OrderByEmailSpecification(email));
+            .GetAllAsync(new OrderByEmailSpecification(email), cancellationToken);
 
         return mapper.Map<IEnumerable<OrderResponse>>(orders);
     }
 
-    public async Task<IEnumerable<DeliveryMethod>> GetDeliveryMethodAsync()
+    public async Task<IEnumerable<DeliveryMethod>> GetDeliveryMethodAsync(CancellationToken cancellationToken)
     {
-        var method = await unitOfWork.GetRepository<DeliveryMethod, int>().GetAllAsync();
+        var method = await unitOfWork.GetRepository<DeliveryMethod, int>().GetAllAsync(cancellationToken);
         return mapper.Map<IEnumerable<DeliveryMethod>>(method);
     }
 }

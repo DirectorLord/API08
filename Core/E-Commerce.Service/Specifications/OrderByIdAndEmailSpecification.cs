@@ -2,11 +2,11 @@
 
 namespace E_Commerce.Service.Specifications;
 
-internal class OrderByIdSpecification
+internal class OrderByIdAndEmailSpecification
     :BaseSpecification<OrderEntity>
 {
-    public OrderByIdSpecification(Guid id)
-        :base(o => o.Id == id)
+    public OrderByIdAndEmailSpecification(string email, Guid id)
+        :base(o => o.Id == id && o.UserEmail == email)
     {
         AddInclude(o => o.DeliveryMethod!);
         AddInclude(o => o.Items);
