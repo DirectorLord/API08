@@ -7,4 +7,5 @@ public class BasketItemDTO
     public string PictureUrl { get; init; }
     public decimal Price { get; init; }
     public int Quantity { get; set; }
+    //ergfw
 }
