@@ -16,6 +16,16 @@ namespace ECommerce.Web
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            builder.Services.AddCors(o =>
+            {
+                o.AddPolicy("AllowAll", builder =>
+                {
+                    builder.AllowAnyOrigin()
+                           .AllowAnyMethod()
+                           .AllowAnyHeader();
+                });
+            });
+
             // Add services to the container.
 
             builder.Services.AddControllers();
@@ -147,8 +157,7 @@ namespace ECommerce.Web
             app.UseAuthentication();
             app.UseAuthorization();
 
-
-
+            app.UseCors("AllowAll");
 
             app.MapControllers();
 
